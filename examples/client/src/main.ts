@@ -519,10 +519,9 @@ const debug = new VOXELIZE.Debug(document.body, {
   },
 });
 
-debug.registerDisplay("Chunks to Request", world.chunks.toRequest, "length");
-debug.registerDisplay("Chunks Requested", world.chunks.requested, "size");
-debug.registerDisplay("Chunks to Process", world.chunks.toProcess, "length");
-debug.registerDisplay("Chunks Loaded", world.chunks.loaded, "size");
+debug.registerDisplay("Chunks Requested", () => world.chunkPipeline.requestedCount);
+debug.registerDisplay("Chunks Processing", () => world.chunkPipeline.processingCount);
+debug.registerDisplay("Chunks Loaded", () => world.chunkPipeline.loadedCount);
 
 debug.registerDisplay("Position", controls, "voxel");
 
@@ -623,8 +622,8 @@ import {
 } from "postprocessing";
 
 import LolImage from "./assets/lol.png";
-import { Map } from "./map";
 import { BOT_HEAD_COLOR, BOT_HEAD_FRONT_COLOR, BOT_SCALE } from "./config/constants";
+import { Map } from "./map";
 
 const BACKEND_SERVER_INSTANCE = new URL(window.location.href);
 const VOXELIZE_LOCALSTORAGE_KEY = "voxelize-world";
@@ -945,21 +944,21 @@ const update = () => {
     : world.options.chunkSize * world.renderRadius;
   const fogColor = inWater
     ? new THREE.Color("#5F9DF7")
-    : world.chunks.uniforms.fogColor.value;
+    : world.chunkRenderer.uniforms.fogColor.value;
 
-  world.chunks.uniforms.fogNear.value = THREE.MathUtils.lerp(
-    world.chunks.uniforms.fogNear.value,
+  world.chunkRenderer.uniforms.fogNear.value = THREE.MathUtils.lerp(
+    world.chunkRenderer.uniforms.fogNear.value,
     fogNear,
     0.08
   );
 
-  world.chunks.uniforms.fogFar.value = THREE.MathUtils.lerp(
-    world.chunks.uniforms.fogFar.value,
+  world.chunkRenderer.uniforms.fogFar.value = THREE.MathUtils.lerp(
+    world.chunkRenderer.uniforms.fogFar.value,
     fogFar,
     0.08
   );
 
-  world.chunks.uniforms.fogColor.value.lerp(fogColor, 0.08);
+  world.chunkRenderer.uniforms.fogColor.value.lerp(fogColor, 0.08);
   
   world.update(
     controls.object.position,
